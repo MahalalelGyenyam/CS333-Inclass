@@ -11,30 +11,33 @@ function printHelp(){
 }
 
 function pingSweep(){
-	local base = "onyxnode"
-	for q in {1..200}
-		do
-			curr="$base$q"
-			ping -c 1 $curr >> ping.log
-		done
+	local base="onyxnode"
+	local found=0;
+	local curr=0;
+	echo "Pinging Nodes... TBD"
+	for i in {1..10}; do
+		local node="${base}${i}"
+		ping -c 1 -W 1 "${node}" >> pingLog.txt
+		if [ $? -eq 0 ]; then
+			echo "Node ${node} is reachable"
+			found=$((found + 1))
+		else
+			echo "Node ${node} is unreachable"
+		fi
+		total=$((total + 1))
+	done
+	echo "Pingsweep done. Found ${found} reachable nodes"
 }
 
 
 function main(){
 	while getopts ":hp" opt; do
-		case ($opt) in
-		h)
-		    printHelp
-			;;
-		p)
-			echo "Beginning Ping Sweep!"
-			pingSweep
-			echo "Done!"
-			;;
-		\?)
+		case ${opt} in
+		h) printHelp ;;
+		p) pingSweep ;;
+		\?) 
 			echo "Invalid option detected! -$OPTARG" >&2
 			printHelp
-			exit 0
 			;;
 
 		esac
@@ -42,9 +45,10 @@ function main(){
 	shift $((OPTIND -1))
 }
 
-if [ $# -eq 0]; then
+#Script entry point
+if [ $# -eq 0 ]; then
 	printHelp
 else
-	main
-
+	main "$@"
+fi
 
